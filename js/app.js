@@ -291,11 +291,19 @@ function renderNewProposal() {
           </div>
           <div class="col-md-2">
             <label class="form-label">Time at Address – Years</label>
-            <select name="currYears" class="form-select">${Array.from({length:25},(_,i)=>`<option value="${i}">${i}</option>`).join("")}<option value="25">25+</option></select>
+            <select name="currYears" class="form-select">
+              <option value="" selected disabled>Years</option>
+              ${Array.from({ length:26 }, (_,i) => i===25
+                ? `<option value="25">25+</option>`
+                : `<option value="${i}">${i}</option>`).join("")}
+            </select>
           </div>
           <div class="col-md-2">
             <label class="form-label">Months</label>
-            <select name="currMonths" class="form-select">${Array.from({length:12},(_,i)=>`<option value="${i}">${i}</option>`).join("")}</select>
+            <select name="currMonths" class="form-select">
+              <option value="" selected disabled>Months</option>
+              ${Array.from({ length:12 }, (_,i)=>`<option value="${i}">${i}</option>`).join("")}
+            </select>
           </div>
         </div>
       </div>
@@ -358,7 +366,8 @@ function renderNewProposal() {
         </div>
       </div>
 
-      <div class="text-end mb-5">
+      <div class="d-flex justify-content-between align-items-center mb-5">
+        <span id="proposalAlert" class="text-danger fw-bold d-none"></span>
         <button type="submit" class="btn btn-primary">Submit Proposal</button>
       </div>
     </form>`;
@@ -368,10 +377,12 @@ function renderNewProposal() {
   const monthsSel = $("select[name='currMonths']", container);
   const prevCard = $("#prevCard", container);
   function updatePrevVisibility() {
-    const years = parseInt(yearsSel.value || "0", 10);
-    const months = parseInt(monthsSel.value || "0", 10);
+    const yearsVal = yearsSel.value;
+    const monthsVal = monthsSel.value || "0";
+    const years = parseInt(yearsVal || "0", 10);
+    const months = parseInt(monthsVal, 10);
     const total = years * 12 + months;
-    if (total < 36) {
+    if (yearsVal !== "" && total < 36) {
       prevCard.classList.remove("d-none");
     } else {
       prevCard.classList.add("d-none");
@@ -379,6 +390,7 @@ function renderNewProposal() {
   }
   yearsSel.addEventListener("change", updatePrevVisibility);
   monthsSel.addEventListener("change", updatePrevVisibility);
+  prevCard.classList.add("d-none");
   updatePrevVisibility();
 
   // Postcode lookup button
