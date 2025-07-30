@@ -1,5 +1,5 @@
 // app.js – Bank of AJO Funder Portal (client-side SPA)
-// Uses in-memory state only (no web storage APIs) to comply with strict instructions.
+// Stores proposals in localStorage so submissions persist across page reloads.
 
 /*****************
  * CONFIGURATION *
@@ -13,10 +13,26 @@ const USERS = {
 /****************
  * GLOBAL STATE *
  ****************/
+const STORAGE_KEY = "bap_proposals";
 const state = {
   authUser: null, // current username string, or null if not authenticated
-  proposals: [],  // array of submitted proposal objects for this tab session
+  proposals: [],  // array of submitted proposal objects persisted in localStorage
 };
+
+function loadProposals() {
+  try {
+    state.proposals = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch {
+    state.proposals = [];
+  }
+}
+
+function saveProposals() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.proposals));
+}
+
+// Initialise proposals from storage on first load
+loadProposals();
 
 /*******************
  * UTILITY HELPERS *
@@ -94,7 +110,6 @@ function renderHeader(root) {
   );
   header.querySelector("#logoutBtn").addEventListener("click", () => {
     state.authUser = null;
-    state.proposals = [];
     navigate("#login");
   });
   root.appendChild(header);
@@ -364,6 +379,7 @@ function renderNewProposal() {
       data: formData,
     };
     state.proposals.push(proposalObj);
+    saveProposals();
 
     // Simulate webhook (ignore errors)
     fetch("https://webhook.site/mock", {
@@ -425,7 +441,7 @@ function renderSubmissions() {
        <table class="table table-striped" id="subsTable">
          <thead>
            <tr>
-             <th>Proposal ID</th><th>Applicant</th><th>Loan Amount (£)</th><th>Status</th><th>PDF</th>
+            <th>Proposal ID</th><th>Applicant</th><th>Loan Amount (£)</th><th>Status</th><th>PDF</th><th></th>
            </tr>
          </thead>
          <tbody></tbody>
@@ -448,7 +464,17 @@ function populateSubmissionsTable() {
         <td>${p.loanAmount}</td>
         <td><span class="badge bg-${badge}">${p.status}</span></td>
         <td><a href="${p.pdfUrl}" target="_blank" class="btn btn-sm btn-outline-primary">Download</a></td>
+        <td><button class="btn btn-sm btn-outline-danger delete-btn" data-id="${p.id}">Delete</button></td>
       </tr>`;
     })
     .join("");
+
+  tbody.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      state.proposals = state.proposals.filter((pr) => pr.id !== id);
+      saveProposals();
+      populateSubmissionsTable();
+    });
+  });
 }
