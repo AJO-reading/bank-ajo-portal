@@ -217,6 +217,7 @@ function renderNewProposal() {
   container.innerHTML = `
     <h3 class="mb-4">New Credit Proposal</h3>
     <form id="proposalForm">
+      <div id="proposalAlert" class="alert alert-danger d-none" role="alert"></div>
       <!-- Applicant Details -->
       <div class="card section-card">
         <div class="card-header fw-semibold">Applicant Details</div>
