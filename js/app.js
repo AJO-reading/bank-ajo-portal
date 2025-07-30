@@ -189,7 +189,6 @@ function renderDashboard() {
   );
   app.appendChild(container);
 
-
   $("#newProposalBtn", container).addEventListener("click", () => navigate("#new"));
   $("#checkSubmissionsBtn", container).addEventListener("click", () => navigate("#submissions"));
 }
