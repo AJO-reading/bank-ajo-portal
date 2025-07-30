@@ -27,6 +27,17 @@ function loadProposals() {
   }
 }
 
+function calculateAge(dob) {
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
 function saveProposals() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state.proposals));
 }
@@ -189,6 +200,7 @@ function renderDashboard() {
   );
   app.appendChild(container);
 
+
   $("#newProposalBtn", container).addEventListener("click", () => navigate("#new"));
   $("#checkSubmissionsBtn", container).addEventListener("click", () => navigate("#submissions"));
 }
@@ -278,7 +290,7 @@ function renderNewProposal() {
             </div>
           </div>
           <div class="col-md-2">
-            <label class="form-label">Years at Address</label>
+            <label class="form-label">Time at Address – Years</label>
             <select name="currYears" class="form-select">${Array.from({length:25},(_,i)=>`<option value="${i}">${i}</option>`).join("")}<option value="25">25+</option></select>
           </div>
           <div class="col-md-2">
@@ -382,7 +394,8 @@ function renderNewProposal() {
     const alertBox = $("#proposalAlert", container);
     if (alertBox) alertBox.classList.add("d-none");
 
-    if (formData.accountNumber && !/^\d{8}$/.test(formData.accountNumber)) {
+    const acct = (formData.accountNumber || "").trim();
+    if (acct && !/^\d{8}$/.test(acct)) {
       if (alertBox) {
         alertBox.textContent = "Account Number must be 8 digits";
         alertBox.classList.remove("d-none");
@@ -391,7 +404,7 @@ function renderNewProposal() {
     }
 
     if (formData.dob) {
-      const age = new Date(Date.now() - new Date(formData.dob).getTime()).getUTCFullYear() - 1970;
+      const age = calculateAge(formData.dob);
       if (age < 18) {
         if (alertBox) {
           alertBox.textContent = "Too Young for Credit";
