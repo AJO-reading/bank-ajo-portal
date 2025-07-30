@@ -61,6 +61,9 @@ function randomStatus() {
  *********************/
 window.addEventListener("hashchange", router);
 document.addEventListener("DOMContentLoaded", router);
+if (document.readyState !== "loading") {
+  router();
+}
 
 function router() {
   const hash = window.location.hash || "#login";
@@ -367,7 +370,12 @@ function renderNewProposal() {
       if (y > 280) { doc.addPage(); y = 20; }
     }
     const pdfBlob = doc.output("blob");
-    const pdfUrl = URL.createObjectURL(pdfBlob);
+    let pdfUrl;
+    if (window.URL && URL.createObjectURL) {
+      pdfUrl = URL.createObjectURL(pdfBlob);
+    } else {
+      pdfUrl = doc.output("datauristring");
+    }
 
     // Store proposal in state
     const proposalObj = {
