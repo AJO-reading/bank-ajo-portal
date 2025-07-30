@@ -289,21 +289,20 @@ function renderNewProposal() {
               <button type="button" id="lookupBtn" class="btn btn-outline-secondary">Lookup</button>
             </div>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">Time at Address – Years</label>
-            <select name="currYears" class="form-select">
-              <option value="" selected disabled>Years</option>
-              ${Array.from({ length:26 }, (_,i) => i===25
-                ? `<option value="25">25+</option>`
-                : `<option value="${i}">${i}</option>`).join("")}
-            </select>
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">Months</label>
-            <select name="currMonths" class="form-select">
-              <option value="" selected disabled>Months</option>
-              ${Array.from({ length:12 }, (_,i)=>`<option value="${i}">${i}</option>`).join("")}
-            </select>
+          <div class="col-md-4">
+            <label class="form-label">Time at Current Address</label>
+            <div class="d-flex gap-2">
+              <select name="currYears" class="form-select">
+                <option value="" selected disabled>Years</option>
+                ${Array.from({ length:26 }, (_,i) => i===25
+                  ? `<option value="25">25+</option>`
+                  : `<option value="${i}">${i}</option>`).join("")}
+              </select>
+              <select name="currMonths" class="form-select">
+                <option value="" selected disabled>Months</option>
+                ${Array.from({ length:12 }, (_,i)=>`<option value="${i}">${i}</option>`).join("")}
+              </select>
+            </div>
           </div>
         </div>
       </div>
