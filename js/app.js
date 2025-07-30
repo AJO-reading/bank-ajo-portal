@@ -189,23 +189,6 @@ function renderDashboard() {
   );
   app.appendChild(container);
 
-  const yearsSel = $("select[name='currYears']", container);
-  const monthsSel = $("select[name='currMonths']", container);
-  const prevCard = $("#prevCard", container);
-  function updatePrevVisibility() {
-    const years = parseInt(yearsSel.value || "0", 10);
-    const months = parseInt(monthsSel.value || "0", 10);
-    const total = years * 12 + months;
-    if (total < 36) {
-      prevCard.classList.remove("d-none");
-    } else {
-      prevCard.classList.add("d-none");
-    }
-  }
-  yearsSel.addEventListener("change", updatePrevVisibility);
-  monthsSel.addEventListener("change", updatePrevVisibility);
-  updatePrevVisibility();
-
   $("#newProposalBtn", container).addEventListener("click", () => navigate("#new"));
   $("#checkSubmissionsBtn", container).addEventListener("click", () => navigate("#submissions"));
 }
@@ -368,6 +351,23 @@ function renderNewProposal() {
       </div>
     </form>`;
   app.appendChild(container);
+
+  const yearsSel = $("select[name='currYears']", container);
+  const monthsSel = $("select[name='currMonths']", container);
+  const prevCard = $("#prevCard", container);
+  function updatePrevVisibility() {
+    const years = parseInt(yearsSel.value || "0", 10);
+    const months = parseInt(monthsSel.value || "0", 10);
+    const total = years * 12 + months;
+    if (total < 36) {
+      prevCard.classList.remove("d-none");
+    } else {
+      prevCard.classList.add("d-none");
+    }
+  }
+  yearsSel.addEventListener("change", updatePrevVisibility);
+  monthsSel.addEventListener("change", updatePrevVisibility);
+  updatePrevVisibility();
 
   // Postcode lookup button
   $("#lookupBtn", container).addEventListener("click", () => {
