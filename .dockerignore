@@ -1,0 +1,16 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+
+# Database
+*.db
+*.sqlite
+
+# Zip file
+*.zip
+
+# IDE/Editor specific
+.vscode

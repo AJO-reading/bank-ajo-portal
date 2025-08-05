@@ -1,31 +1,853 @@
 <!DOCTYPE html>
-<html lang="en" data-color-scheme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bank of AJO – Funder Portal</title>
-    <!-- Bootstrap 5 CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-STqaR2zt2MtwLecxB2S/bR5E2wE8p8nH3UX0YPD6/COM24kTx5c5NyEJD7BqXc9N"
-      crossorigin="anonymous"
-    />
-    <!-- Custom Styles   -->
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div id="app"></div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BYD Lease Funder Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="brand-logo">
+                            <span class="brand-byd">BYD</span>
+                            <span class="brand-lease">LEASE</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div id="user-info" class="user-info d-none">
+                            <span id="current-user"></span>
+                            <button id="submissions-btn" class="btn btn-sm btn-outline-light ms-2">Check Submissions</button>
+                            <button id="logout-btn" class="btn btn-sm btn-outline-light ms-2">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-    <!-- Bootstrap 5 Bundle (incl. Popper) -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-Gr8XEZTknmo9dZYkTfGZNVVRFlE0YyqS/fWznuaCG2lKT9IAXoJ1i8L6Rxur+8W0"
-      crossorigin="anonymous"
-    ></script>
-    <!-- jsPDF for PDF generation (local copy to avoid CDN issues) -->
-    <script src="vendor/jspdf.umd.min.js"></script>
-    <!-- Main application script -->
-    <script src="js/app.js"></script>
-  </body>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Login Page -->
+            <div id="login-page" class="page-content">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="login-card card">
+                                <div class="card-header text-center">
+                                    <h3>Login to BYD Lease Portal</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="login-form">
+                                        <div class="form-group mb-3">
+                                            <label for="username" class="form-label">Username</label>
+                                            <input type="text" class="form-control" id="username" name="username" required>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" id="password" name="password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                                    </form>
+                                    <div id="login-error" class="alert alert-danger mt-3 d-none"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Quotation Page -->
+            <div id="search-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Search Quotation</h2>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="search-form">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="customer-code" class="form-label">Customer Code</label>
+                                            <input type="text" class="form-control" id="customer-code" name="customer_code">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="customer-name" class="form-label">Customer Name</label>
+                                            <input type="text" class="form-control" id="customer-name" name="customer_name">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="quotation" class="form-label">Quotation</label>
+                                            <input type="text" class="form-control" id="quotation" name="quotation" value="29396187/1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="revision" class="form-label">Revision</label>
+                                            <input type="text" class="form-control" id="revision" name="revision">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="salesperson" class="form-label">Salesperson</label>
+                                            <input type="text" class="form-control" id="salesperson" name="salesperson">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-control" id="status" name="status">
+                                                <option value="">All</option>
+                                                <option value="Open">Open</option>
+                                                <option value="Closed">Closed</option>
+                                                <option value="Pending">Pending</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="date-from" class="form-label">Date From</label>
+                                            <input type="date" class="form-control" id="date-from" name="date_from">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="date-to" class="form-label">Date To</label>
+                                            <input type="date" class="form-control" id="date-to" name="date_to">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Run your query</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results Page -->
+            <div id="results-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Quotation Search Results</h2>
+                        <button id="back-to-search" class="btn btn-secondary">Back to Search</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Quotation Number</th>
+                                            <th>Date</th>
+                                            <th>Expiry Date</th>
+                                            <th>Vehicle</th>
+                                            <th>Payment</th>
+                                            <th>Status</th>
+                                            <th>Salesperson</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="results-tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Summary Page -->
+            <div id="summary-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Quotation Summary</h2>
+                        <button id="back-to-results" class="btn btn-secondary">Back to Results</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="quote-summary-content">
+                                <!-- Dynamic content will be loaded here -->
+                            </div>
+                            <div class="mt-4">
+                                <button id="individual-proposal-btn" class="btn btn-primary btn-lg">Individual Proposal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual Proposal Page -->
+            <div id="proposal-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Individual Proposal Data</h2>
+                        <button id="back-to-summary" class="btn btn-secondary">Back to Summary</button>
+                    </div>
+                    
+                    <form id="proposal-form">
+                        <!-- Introducer Detail Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Introducer Detail</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="introducer-name" class="form-label">Introducer name (Select BYD Broker)</label>
+                                            <select class="form-control" id="introducer-name" name="introducer_name" required>
+                                                <option value="">Select Broker</option>
+                                                <option value="BYD Broker 1">BYD Broker 1</option>
+                                                <option value="BYD Broker 2">BYD Broker 2</option>
+                                                <option value="BYD Broker 3">BYD Broker 3</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="introducer-email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="introducer-email" name="introducer_email" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="contact-name" class="form-label">Contact name</label>
+                                            <input type="text" class="form-control" id="contact-name" name="contact_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="tel-no" class="form-label">Tel no</label>
+                                            <input type="tel" class="form-control" id="tel-no" name="tel_no" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Credit Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Customer Credit</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="credit-line" class="form-label">Credit line</label>
+                                            <input type="text" class="form-control" id="credit-line" name="credit_line" value="30212.2" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="quote-number" class="form-label">Quote number</label>
+                                            <input type="text" class="form-control" id="quote-number" name="quote_number" value="29396187/2" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="payment-profile" class="form-label">Payment profile</label>
+                                            <input type="text" class="form-control" id="payment-profile" name="payment_profile" value="Monthly">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="monthly-rental" class="form-label">Monthly rental</label>
+                                            <input type="text" class="form-control" id="monthly-rental" name="monthly_rental" value="277.58" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal Details Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Personal Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-3">
+                                            <label for="title" class="form-label">Title</label>
+                                            <select class="form-control" id="title" name="title" required>
+                                                <option value="">Select</option>
+                                                <option value="Mr">Mr</option>
+                                                <option value="Mrs">Mrs</option>
+                                                <option value="Miss">Miss</option>
+                                                <option value="Ms">Ms</option>
+                                                <option value="Dr">Dr</option>
+                                                <option value="Prof">Prof</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="surname" class="form-label">Surname</label>
+                                            <input type="text" class="form-control" id="surname" name="surname" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="form-group mb-3">
+                                            <label for="first-name" class="form-label">Full first name</label>
+                                            <input type="text" class="form-control" id="first-name" name="first_name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="date-of-birth" class="form-label">Date of birth</label>
+                                            <input type="date" class="form-control" id="date-of-birth" name="date_of_birth" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="maiden-name" class="form-label">Maiden name</label>
+                                            <input type="text" class="form-control" id="maiden-name" name="maiden_name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="marital-status" class="form-label">Marital status</label>
+                                            <select class="form-control" id="marital-status" name="marital_status" required>
+                                                <option value="">Select</option>
+                                                <option value="Single">Single</option>
+                                                <option value="Married">Married</option>
+                                                <option value="Civil Partnership">Civil Partnership</option>
+                                                <option value="Divorced">Divorced</option>
+                                                <option value="Separated">Separated</option>
+                                                <option value="Widowed">Widowed</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="gender" class="form-label">Gender</label>
+                                            <select class="form-control" id="gender" name="gender" required>
+                                                <option value="">Select</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Prefer not to say">Prefer not to say</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="country-of-birth" class="form-label">Country of birth</label>
+                                            <select class="form-control" id="country-of-birth" name="country_of_birth" required>
+                                                <option value="">Select</option>
+                                                <option value="United Kingdom">United Kingdom</option>
+                                                <option value="Ireland">Ireland</option>
+                                                <option value="Other EU">Other EU</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="nationality" class="form-label">Nationality</label>
+                                            <select class="form-control" id="nationality" name="nationality" required>
+                                                <option value="">Select</option>
+                                                <option value="British">British</option>
+                                                <option value="Irish">Irish</option>
+                                                <option value="Other EU">Other EU</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Details Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Address Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>Current Address</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="building-name" class="form-label">Building name/number</label>
+                                            <input type="text" class="form-control" id="building-name" name="building_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="street" class="form-label">Street</label>
+                                            <input type="text" class="form-control" id="street" name="street" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="town" class="form-label">Town</label>
+                                            <input type="text" class="form-control" id="town" name="town" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="county" class="form-label">County</label>
+                                            <input type="text" class="form-control" id="county" name="county" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="postcode" class="form-label">Postcode</label>
+                                            <input type="text" class="form-control" id="postcode" name="postcode" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="residential-status" class="form-label">Residential status</label>
+                                            <select class="form-control" id="residential-status" name="residential_status" required>
+                                                <option value="">Select</option>
+                                                <option value="Owner Occupier">Owner Occupier</option>
+                                                <option value="Tenant - Private">Tenant - Private</option>
+                                                <option value="Tenant - Council/Housing Association">Tenant - Council/Housing Association</option>
+                                                <option value="Living with Parents">Living with Parents</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="time-at-address" class="form-label">Time at this address</label>
+                                            <input type="text" class="form-control" id="time-at-address" name="time_at_address" placeholder="Years and months" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employment Details Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Employment Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="occupation" class="form-label">Occupation</label>
+                                            <select class="form-control" id="occupation" name="occupation" required>
+                                                <option value="">Select</option>
+                                                <option value="Accountant">Accountant</option>
+                                                <option value="Administrator">Administrator</option>
+                                                <option value="Architect">Architect</option>
+                                                <option value="Builder">Builder</option>
+                                                <option value="Consultant">Consultant</option>
+                                                <option value="Doctor">Doctor</option>
+                                                <option value="Engineer">Engineer</option>
+                                                <option value="Executive">Executive</option>
+                                                <option value="Farmer">Farmer</option>
+                                                <option value="Manager">Manager</option>
+                                                <option value="Nurse">Nurse</option>
+                                                <option value="Police Officer">Police Officer</option>
+                                                <option value="Retired">Retired</option>
+                                                <option value="Sales">Sales</option>
+                                                <option value="Self Employed">Self Employed</option>
+                                                <option value="Teacher">Teacher</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="employment-status" class="form-label">Employment status</label>
+                                            <select class="form-control" id="employment-status" name="employment_status" required>
+                                                <option value="">Select</option>
+                                                <option value="Employed">Employed</option>
+                                                <option value="Self Employed">Self Employed</option>
+                                                <option value="Retired">Retired</option>
+                                                <option value="Student">Student</option>
+                                                <option value="Unemployed">Unemployed</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="employers-name" class="form-label">Employers name</label>
+                                            <input type="text" class="form-control" id="employers-name" name="employers_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="time-with-employer" class="form-label">Time with employer</label>
+                                            <input type="text" class="form-control" id="time-with-employer" name="time_with_employer" placeholder="Years and months" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-3">
+                                            <label for="employer-business-activity" class="form-label">Employer business activity</label>
+                                            <select class="form-control" id="employer-business-activity" name="employer_business_activity" required>
+                                                <option value="">Select</option>
+                                                <option value="Agriculture">Agriculture</option>
+                                                <option value="Banking/Finance">Banking/Finance</option>
+                                                <option value="Construction">Construction</option>
+                                                <option value="Education">Education</option>
+                                                <option value="Engineering">Engineering</option>
+                                                <option value="Government">Government</option>
+                                                <option value="Healthcare">Healthcare</option>
+                                                <option value="Insurance">Insurance</option>
+                                                <option value="Legal">Legal</option>
+                                                <option value="Manufacturing">Manufacturing</option>
+                                                <option value="Retail">Retail</option>
+                                                <option value="Technology">Technology</option>
+                                                <option value="Transport">Transport</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employers Address Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Employers Address</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="emp-building-name" class="form-label">Building name/number</label>
+                                            <input type="text" class="form-control" id="emp-building-name" name="emp_building_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="emp-street" class="form-label">Street</label>
+                                            <input type="text" class="form-control" id="emp-street" name="emp_street" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="emp-town" class="form-label">Town</label>
+                                            <input type="text" class="form-control" id="emp-town" name="emp_town" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="emp-county" class="form-label">County</label>
+                                            <input type="text" class="form-control" id="emp-county" name="emp_county" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label for="emp-postcode" class="form-label">Postcode</label>
+                                            <input type="text" class="form-control" id="emp-postcode" name="emp_postcode" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Details Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Bank Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="account-name" class="form-label">Account name</label>
+                                            <input type="text" class="form-control" id="account-name" name="account_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="bank-name" class="form-label">Bank name</label>
+                                            <input type="text" class="form-control" id="bank-name" name="bank_name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="account-number" class="form-label">Account number</label>
+                                            <input type="text" class="form-control" id="account-number" name="account_number" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="sort-code" class="form-label">Sort code</label>
+                                            <input type="text" class="form-control" id="sort-code" name="sort_code" pattern="[0-9]{2}-[0-9]{2}-[0-9]{2}" placeholder="XX-XX-XX" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="time-at-bank" class="form-label">Time at bank</label>
+                                            <input type="text" class="form-control" id="time-at-bank" name="time_at_bank" placeholder="Years and months" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Details Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Card Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="debit-credit-card" class="form-label">Debit/Credit card</label>
+                                            <select class="form-control" id="debit-credit-card" name="debit_credit_card" required>
+                                                <option value="">Select</option>
+                                                <option value="Debit Card">Debit Card</option>
+                                                <option value="Credit Card">Credit Card</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="card-type" class="form-label">Card type</label>
+                                            <select class="form-control" id="card-type" name="card_type" required>
+                                                <option value="">Select</option>
+                                                <option value="Visa">Visa</option>
+                                                <option value="Mastercard">Mastercard</option>
+                                                <option value="American Express">American Express</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Income & Expenditure Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Income & Expenditure</h4>
+                            </div>
+                            <div class="card-body">
+                                <h5>Monthly Income</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="salary" class="form-label">Salary</label>
+                                            <input type="number" step="0.01" class="form-control" id="salary" name="salary" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="other-income" class="form-label">Other income</label>
+                                            <input type="number" step="0.01" class="form-control" id="other-income" name="other_income">
+                                        </div>
+                                    </div>
+                                </div>
+                                <h5>Monthly Commitments</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="mortgage-rent" class="form-label">Mortgage/Rent</label>
+                                            <input type="number" step="0.01" class="form-control" id="mortgage-rent" name="mortgage_rent" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="other-commitments" class="form-label">Other commitments</label>
+                                            <input type="number" step="0.01" class="form-control" id="other-commitments" name="other_commitments">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Supporting Comments Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Supporting Comments</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="supporting-comments" class="form-label">Additional comments</label>
+                                    <textarea class="form-control" id="supporting-comments" name="supporting_comments" rows="4"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checkboxes Section -->
+                        <div class="card mb-4">
+                            <div class="card-header section-header">
+                                <h4>Additional Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="verbal-script" name="verbal_script">
+                                            <label class="form-check-label" for="verbal-script">
+                                                Verbal Script
+                                            </label>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="verbal-script-btn">View Script</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="face-to-face" name="face_to_face">
+                                            <label class="form-check-label" for="face-to-face">
+                                                Face to face meeting
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="attached-documents" name="attached_documents">
+                                            <label class="form-check-label" for="attached-documents">
+                                                Attached Documents
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="manufacturers-support" name="manufacturers_support">
+                                            <label class="form-check-label" for="manufacturers-support">
+                                                Manufacturers Retrospective Support
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg" id="save-submit-btn">Save and submit individual proposal data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Tracking Page -->
+            <div id="tracking-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Order Tracking</h2>
+                        <button id="back-to-proposal" class="btn btn-secondary">Back to Proposal</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tracking-stages">
+                                <div class="stage stage-complete">
+                                    <div class="stage-icon">✓</div>
+                                    <div class="stage-label">Decision</div>
+                                </div>
+                                <div class="stage stage-complete">
+                                    <div class="stage-icon">✓</div>
+                                    <div class="stage-label">Proposal ID</div>
+                                </div>
+                                <div class="stage stage-active">
+                                    <div class="stage-icon">●</div>
+                                    <div class="stage-label">Submissions</div>
+                                </div>
+                                <div class="stage">
+                                    <div class="stage-icon">○</div>
+                                    <div class="stage-label">Order</div>
+                                </div>
+                                <div class="stage">
+                                    <div class="stage-icon">○</div>
+                                    <div class="stage-label">Delivery</div>
+                                </div>
+                                <div class="stage">
+                                    <div class="stage-icon">○</div>
+                                    <div class="stage-label">Lease Active</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h4>Submission Details</h4>
+                                <div id="submission-details">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submissions Page -->
+            <div id="submissions-page" class="page-content d-none">
+                <div class="container">
+                    <div class="page-header">
+                        <h2>Submissions</h2>
+                        <button id="back-to-search-from-submissions" class="btn btn-secondary">Back to Search</button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="submissions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Proposal ID</th>
+                                            <th>Customer Name</th>
+                                            <th>Quote Number</th>
+                                            <th>Monthly Rental</th>
+                                            <th>Submission Date</th>
+                                            <th>Decision Status</th>
+                                            <th>PDF</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="submissions-tbody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
 </html>
